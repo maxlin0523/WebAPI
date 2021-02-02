@@ -1,23 +1,24 @@
-﻿using System;
+﻿using Dapper;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using WebApplication1.Models;
-using Dapper;
-using System.Data.SqlClient;
-using System.Data.Entity;
-using Newtonsoft.Json;
 
 namespace WebApplication1.Controllers
 {
     [RoutePrefix("player")]
     public class PlayerController : ApiController
     {
-        public const string db_NBA = "Server=tcp:maxlin.database.windows.net,1433;Initial Catalog=maxlin0523;Persist Security Info=False;User ID=happytieu;Password={password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-        private static SqlConnection DapperNBA = new SqlConnection(db_NBA);
-        private static maxlin0523Entities EntitiesNBA = new maxlin0523Entities();
+        private readonly SqlConnection _dapper;
+        private readonly maxlin0523Entities _entities;
+        public PlayerController()
+        {
+            _dapper = DataCenter.DapperNBA;
+            _entities = DataCenter.EntitiesNBA;
+        }
 
         // /player/get/true
         [Route("get/{isDP}")]
@@ -25,33 +26,34 @@ namespace WebApplication1.Controllers
         public IEnumerable<NBA> Get(bool isDP)
         {
             IEnumerable<NBA> result = null;
+           
             var DPstr = "SELECT * FROM [dbo].[NBA]";
+
             if (isDP)
             {
-                result = DapperNBA.Query<NBA>(DPstr);
+                result = _dapper.Query<NBA>(DPstr);
             }
             else
             {
-                result = EntitiesNBA.NBA.Select(c => c);
+                result = _entities.NBA.ToList();
             }
             return result;
         }
 
-        // /player/get/A/true
         [Route("get/{name}/{isDP}")]
         [HttpGet]
-        public IEnumerable<NBA> GetByName(string name, bool isDP)
+        public NBA GetByName(string name, bool isDP)
         {
-            IEnumerable<NBA> result = null;
+            NBA result = null;
 
             if (isDP)
             {
                 var DPstr = $"SELECT * FROM [dbo].[NBA] WHERE Name = '{name}'";
-                result = DapperNBA.Query<NBA>(DPstr);
+                result = _dapper.QuerySingle<NBA>(DPstr);
             }
             else
             {
-                result = EntitiesNBA.NBA.Where(c => c.Name == name);
+                result = _entities.NBA.Single(c => c.Name == name);
             }
             return result;
         }
@@ -61,12 +63,12 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public string Post(string json, bool isDP)
         {
-            int result = 1;
-            var jsonObject = JsonConvert.DeserializeObject<NBA>(json);
+            var result = 1;
             var exception = string.Empty;
 
             try
             {
+                var jsonObject = JsonConvert.DeserializeObject<NBA>(json);
                 if (isDP)
                 {
                     var DPstr = @"
@@ -78,28 +80,30 @@ namespace WebApplication1.Controllers
                                 (@Name
                                 ,@Team
                                 ,@Position)";
-                    result = DapperNBA.Execute(DPstr, jsonObject);
+                    result = _dapper.Execute(DPstr, jsonObject);
                 }
                 else
                 {
-                    EntitiesNBA.NBA.Add(jsonObject);
-                    EntitiesNBA.SaveChanges();
+                    _entities.NBA.Add(jsonObject);
+                    _entities.SaveChanges();
                 }
             }
-            catch (Exception b)
+            catch (Exception ex)
             {
-                exception = b.ToString();
+                exception = ex.ToString();
                 result = 0;
             }
+
             return result == 1 ? "SUCCESS" : $"FAIL\n{exception}";
         }
 
         [Route("put/{json}/{isDP}")]
-        [HttpPut]
+        [HttpGet]
         public string Put(string json, bool isDP)
         {
-            int result = 0;
+            var result = 1;
             var exception = string.Empty;
+
             try
             {
                 var jsonObject = JsonConvert.DeserializeObject<NBA>(json);
@@ -115,31 +119,54 @@ namespace WebApplication1.Controllers
                            ,[Team] = '{team}'
                            ,[Position] = '{position}'
                      WHERE Name = '{name}'";
-                    result = DapperNBA.Execute(str);
+                    result = _dapper.Execute(str);
                 }
                 else
                 {
-                    var data = EntitiesNBA.NBA.Find(jsonObject.Name);
+                    var data = _entities.NBA.Find(jsonObject.Name);
                     data.Name = jsonObject.Name;
                     data.Position = jsonObject.Position;
                     data.Team = jsonObject.Team;
-                    EntitiesNBA.SaveChanges();
+                    _entities.SaveChanges();
                 }
             }
-            catch (Exception b)
+            catch (Exception ex)
             {
-                exception = b.ToString();
+                exception = ex.ToString();
                 result = 0;
             }
+
             return result == 1 ? "SUCCESS" : $"FAIL\n{exception}";
         }
 
-        // DELETE api/values/5
-        [Route("delete/{id}")]
+        [Route("delete/{name}/{isDP}")]
         [HttpGet]
-        public void Delete(int id)
+        public string Delete(string name,bool isDP)
         {
-            var s = "y";
+            var result = 1;
+            var exception = string.Empty;
+
+            try
+            {
+                if (isDP)
+                {
+                    var DPstr = $"DELETE FROM [dbo].[NBA] WHERE Name = '{name}'";
+                    result = _dapper.Execute(DPstr);
+                }
+                else
+                {
+                    var data = _entities.NBA.Single(c => c.Name == name);
+                    _entities.NBA.Remove(data);
+                    _entities.SaveChanges();
+                }
+            }
+            catch(Exception ex)
+            {
+                exception = ex.ToString();
+                result = 0;                  
+            }
+
+            return result == 1 ? "SUCCESS" : $"FAIL\n{exception}";
         }
     }
 }

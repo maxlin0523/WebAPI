@@ -145,6 +145,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Tools.cs" />
     <Compile Include="Models\DataCenter.cs" />
     <Compile Include="Models\NBA.cs">
       <DependentUpon>NBAModel.tt</DependentUpon>
