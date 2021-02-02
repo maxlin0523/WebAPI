@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -27,7 +29,7 @@ namespace WebApplication1.Models
         }
 
         /// <summary>
-        /// aes解密
+        /// AES Decode
         /// </summary>
         /// <param name="SourceStr"></param>
         /// <param name="CryptoKey"></param>
@@ -60,6 +62,31 @@ namespace WebApplication1.Models
             {
             }
             return decrypt;
+        }
+
+        /// <summary>
+        /// 判斷JSON格式
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool IsJsonFormat(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+            if ((value.StartsWith("{") && value.EndsWith("}")) ||
+                (value.StartsWith("[") && value.EndsWith("]")))
+            {
+                try
+                {
+                    var obj = JToken.Parse(value);
+                    return true;
+                }
+                catch (JsonReaderException)
+                {
+                    return false;
+                }
+            }
+            return false;
         }
     }
 }

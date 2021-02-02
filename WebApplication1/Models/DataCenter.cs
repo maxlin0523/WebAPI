@@ -15,13 +15,11 @@ namespace WebApplication1.Models
             }
         }
 
-        public static SqlConnection DapperNBA { get; set; }
-        public static maxlin0523Entities EntitiesNBA;
+        public static SqlConnection DapperNBA = new SqlConnection(_dbStr);
+        public static maxlin0523Entities EntitiesNBA = new maxlin0523Entities();
 
         static DataCenter()
         {
-            DapperNBA = new SqlConnection(_dbStr);
-            EntitiesNBA = new maxlin0523Entities();
         }
     }
 }

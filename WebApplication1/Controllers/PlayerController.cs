@@ -21,17 +21,17 @@ namespace WebApplication1.Controllers
         }
 
         // /player/get/true
-        [Route("get/{isDP}")]
+        [Route("get/{IsDP}")]
         [HttpGet]
-        public IEnumerable<NBA> Get(bool isDP)
+        public IEnumerable<NBA> Get([FromUri] Paramter param)
         {
             IEnumerable<NBA> result = null;
-           
-            var DPstr = "SELECT * FROM [dbo].[NBA]";
 
-            if (isDP)
+            var dpStr = "SELECT * FROM [dbo].[NBA]";
+
+            if (param.IsDP)
             {
-                result = _dapper.Query<NBA>(DPstr);
+                result = _dapper.Query<NBA>(dpStr);
             }
             else
             {
@@ -40,38 +40,47 @@ namespace WebApplication1.Controllers
             return result;
         }
 
-        [Route("get/{name}/{isDP}")]
+        [Route("get/{IsDP}/{Name}")]
         [HttpGet]
-        public NBA GetByName(string name, bool isDP)
+        public NBA GetByName([FromUri] Paramter param)
         {
             NBA result = null;
+            var exception = string.Empty;
 
-            if (isDP)
+            try
             {
-                var DPstr = $"SELECT * FROM [dbo].[NBA] WHERE Name = '{name}'";
-                result = _dapper.QuerySingle<NBA>(DPstr);
+                if (param.IsDP)
+                {
+                    var dpStr = $"SELECT * FROM [dbo].[NBA] WHERE Name = '{param.Name}'";
+                    result = _dapper.QuerySingle<NBA>(dpStr);
+                }
+                else
+                {
+                    result = _entities.NBA.Single(c => c.Name == param.Name);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                result = _entities.NBA.Single(c => c.Name == name);
+                exception = ex.ToString();
             }
             return result;
         }
+
         // https://localhost:44355/player/post/{"name": "A", "position": "SG", "team": "A_TEAM"}/true
         // {"name": "A", "position": "SG", "team": "A_TEAM"}
-        [Route("post/{json}/{isDP}")]
+        [Route("post/{IsDP}/{Json}")]
         [HttpGet]
-        public string Post(string json, bool isDP)
+        public string Post([FromUri] Paramter param)
         {
             var result = 1;
             var exception = string.Empty;
 
             try
             {
-                var jsonObject = JsonConvert.DeserializeObject<NBA>(json);
-                if (isDP)
+                var jsonObject = JsonConvert.DeserializeObject<NBA>(param.Json);
+                if (param.IsDP)
                 {
-                    var DPstr = @"
+                    var dpStr = @"
                      INSERT INTO [dbo].[NBA]
                                 ([Name]
                                 ,[Team]
@@ -80,7 +89,7 @@ namespace WebApplication1.Controllers
                                 (@Name
                                 ,@Team
                                 ,@Position)";
-                    result = _dapper.Execute(DPstr, jsonObject);
+                    result = _dapper.Execute(dpStr, jsonObject);
                 }
                 else
                 {
@@ -97,29 +106,29 @@ namespace WebApplication1.Controllers
             return result == 1 ? "SUCCESS" : $"FAIL\n{exception}";
         }
 
-        [Route("put/{json}/{isDP}")]
+        [Route("put/{IsDP}/{Json}")]
         [HttpGet]
-        public string Put(string json, bool isDP)
+        public string Put([FromUri] Paramter param)
         {
             var result = 1;
             var exception = string.Empty;
 
             try
             {
-                var jsonObject = JsonConvert.DeserializeObject<NBA>(json);
-                if (isDP)
+                var jsonObject = JsonConvert.DeserializeObject<NBA>(param.Json);
+                if (param.IsDP)
                 {
                     var name = jsonObject.Name;
                     var team = jsonObject.Team;
                     var position = jsonObject.Position;
-                    var str =
+                    var dpStr =
                     $@"
                      UPDATE [dbo].[NBA]
                         SET [Name] = '{name}'
                            ,[Team] = '{team}'
                            ,[Position] = '{position}'
                      WHERE Name = '{name}'";
-                    result = _dapper.Execute(str);
+                    result = _dapper.Execute(dpStr);
                 }
                 else
                 {
@@ -139,31 +148,31 @@ namespace WebApplication1.Controllers
             return result == 1 ? "SUCCESS" : $"FAIL\n{exception}";
         }
 
-        [Route("delete/{name}/{isDP}")]
+        [Route("delete/{IsDP}/{Name}")]
         [HttpGet]
-        public string Delete(string name,bool isDP)
+        public string Delete([FromUri] Paramter param)
         {
             var result = 1;
             var exception = string.Empty;
 
             try
             {
-                if (isDP)
+                if (param.IsDP)
                 {
-                    var DPstr = $"DELETE FROM [dbo].[NBA] WHERE Name = '{name}'";
-                    result = _dapper.Execute(DPstr);
+                    var dpStr = $"DELETE FROM [dbo].[NBA] WHERE Name = '{param.Name}'";
+                    result = _dapper.Execute(dpStr);
                 }
                 else
                 {
-                    var data = _entities.NBA.Single(c => c.Name == name);
+                    var data = _entities.NBA.Single(c => c.Name == param.Name);
                     _entities.NBA.Remove(data);
                     _entities.SaveChanges();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 exception = ex.ToString();
-                result = 0;                  
+                result = 0;
             }
 
             return result == 1 ? "SUCCESS" : $"FAIL\n{exception}";
