@@ -16,8 +16,8 @@ namespace WebApplication1.Controllers
         private readonly maxlin0523Entities _entities;
         public PlayerController()
         {
-            _dapper = DataCenter.DapperNBA;
-            _entities = DataCenter.EntitiesNBA;
+            _dapper = DataCenter.Instance.DapperNBA;
+            _entities = DataCenter.Instance.EntitiesNBA;
         }
 
         // /player/get/true
@@ -42,21 +42,21 @@ namespace WebApplication1.Controllers
 
         [Route("get/{IsDP}/{Name}")]
         [HttpGet]
-        public NBA GetByName([FromUri] Paramter param)
+        public IEnumerable<NBA> GetByName([FromUri] Paramter param)
         {
-            NBA result = null;
+            IEnumerable<NBA> result = null;
             var exception = string.Empty;
 
             try
             {
                 if (param.IsDP)
                 {
-                    var dpStr = $"SELECT * FROM [dbo].[NBA] WHERE Name = '{param.Name}'";
-                    result = _dapper.QuerySingle<NBA>(dpStr);
+                    var dpStr = $"SELECT * FROM [dbo].[NBA] WHERE Name = @Name";
+                    result = _dapper.Query<NBA>(dpStr, new  { param.Name});
                 }
                 else
                 {
-                    result = _entities.NBA.Single(c => c.Name == param.Name);
+                    result = _entities.NBA.Where(c => c.Name == param.Name);
                 }
             }
             catch (Exception ex)
@@ -118,17 +118,14 @@ namespace WebApplication1.Controllers
                 var jsonObject = JsonConvert.DeserializeObject<NBA>(param.Json);
                 if (param.IsDP)
                 {
-                    var name = jsonObject.Name;
-                    var team = jsonObject.Team;
-                    var position = jsonObject.Position;
-                    var dpStr =
-                    $@"
+                    var datas = new { Name = jsonObject.Name, Team = jsonObject.Team, Position = jsonObject.Position };
+                    var dpStr =@"
                      UPDATE [dbo].[NBA]
-                        SET [Name] = '{name}'
-                           ,[Team] = '{team}'
-                           ,[Position] = '{position}'
-                     WHERE Name = '{name}'";
-                    result = _dapper.Execute(dpStr);
+                        SET [Name] = @Name
+                           ,[Team] = @Team
+                           ,[Position] = @Position
+                     WHERE Name = @Name";
+                    result = _dapper.Execute(dpStr, datas);
                 }
                 else
                 {
@@ -159,8 +156,8 @@ namespace WebApplication1.Controllers
             {
                 if (param.IsDP)
                 {
-                    var dpStr = $"DELETE FROM [dbo].[NBA] WHERE Name = '{param.Name}'";
-                    result = _dapper.Execute(dpStr);
+                    var dpStr = $"DELETE FROM [dbo].[NBA] WHERE Name = @Name";
+                    result = _dapper.Execute(dpStr, new { Name = param.Name });
                 }
                 else
                 {

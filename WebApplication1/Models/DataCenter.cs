@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 
 namespace WebApplication1.Models
 {
-    public static class DataCenter
+    public class DataCenter
     {
         private static string _dbStr
         {
@@ -15,11 +15,26 @@ namespace WebApplication1.Models
             }
         }
 
-        public static SqlConnection DapperNBA = new SqlConnection(_dbStr);
-        public static maxlin0523Entities EntitiesNBA = new maxlin0523Entities();
+        public SqlConnection DapperNBA = new SqlConnection(_dbStr);
+        public maxlin0523Entities EntitiesNBA = new maxlin0523Entities();
 
-        static DataCenter()
+        private DataCenter()
         {
+        }
+
+        private static DataCenter _instance;
+         
+        public static DataCenter Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new DataCenter();
+                }
+
+                return _instance;
+            }
         }
     }
 }

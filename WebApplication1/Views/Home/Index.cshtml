@@ -1,5 +1,11 @@
-﻿<div class="jumbotron">  
-    
+﻿@section JavaScript
+{
+    <script type="text/javascript" src="@Url.Content("/Scripts/jquery-3.4.1.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("/Scripts/AnotherScript.js")"></script>
+}
+
+<div class="jumbotron">
+
     <h1>MaxLin WebAPI</h1>
     <input type="button" id="max" value="WebAPI">
     <script>
@@ -7,5 +13,6 @@
         id.onclick = function () {
             window.location.href = `${location.href}/swagger`;
         }
-        </script>
+        $
+    </script>
 </div>
