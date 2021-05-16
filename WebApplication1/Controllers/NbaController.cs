@@ -1,15 +1,11 @@
 ﻿using Dapper;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
 using System.Web.Http;
 using WebApplication1.Controllers.Parameters;
-using WebApplication1.Controllers.ViewModels;
-using WebApplication1.Repository;
+using WebApplication1.Controllers.Models.ViewModels;
 using WebApplication1.Repository.Helpers;
+using WebApplication1.Controllers.Models.Parameters;
 
 namespace WebApplication1.Controllers
 {

@@ -155,9 +155,9 @@
     <Compile Include="App_Start\UnityWebApiActivator.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\Parameters\NbaPrimaryParameter.cs" />
-    <Compile Include="Controllers\Parameters\NbaParameter.cs" />
-    <Compile Include="Controllers\ViewModels\NbaViewModel.cs" />
+    <Compile Include="Controllers\Models\Parameters\NbaPrimaryParameter.cs" />
+    <Compile Include="Controllers\Models\Parameters\NbaParameter.cs" />
+    <Compile Include="Controllers\Models\ViewModels\NbaViewModel.cs" />
     <Compile Include="Controllers\NbaController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
