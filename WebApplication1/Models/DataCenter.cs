@@ -5,21 +5,13 @@ namespace WebApplication1.Models
 {
     public class DataCenter
     {
-        private static string _dbStr
-        {
-            get
-            {
-                var str = new SqlConnectionStringBuilder(ConfigurationManager.AppSettings["DBStr"]);
-                str.Password = Tools.Instance.aesDecryptBase64(str.Password, "gss");
-                return str.ToString();
-            }
-        }
+        private static string BasketballLeagueConnectionString = ConfigurationManager.AppSettings["ConnectionString"];
 
-        public SqlConnection DapperNBA = new SqlConnection(_dbStr);
-        public maxlin0523Entities EntitiesNBA = new maxlin0523Entities();
+        public SqlConnection BasketballLeagueDatabase = new SqlConnection(BasketballLeagueConnectionString);
 
         private DataCenter()
         {
+
         }
 
         private static DataCenter _instance;

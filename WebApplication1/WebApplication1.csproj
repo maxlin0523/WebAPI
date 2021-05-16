@@ -144,31 +144,14 @@
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\PlayerController.cs" />
+    <Compile Include="Controllers\Parameters\NbaPrimaryParameter.cs" />
+    <Compile Include="Controllers\Parameters\NbaParameter.cs" />
+    <Compile Include="Controllers\ViewModels\NbaViewModel.cs" />
+    <Compile Include="Controllers\NbaController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\Paramter.cs" />
-    <Compile Include="Models\Tools.cs" />
     <Compile Include="Models\DataCenter.cs" />
-    <Compile Include="Models\NBA.cs">
-      <DependentUpon>NBAModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\NBAModel.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>NBAModel.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\NBAModel.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>NBAModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\NBAModel.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>NBAModel.edmx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -179,25 +162,8 @@
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
-    <Content Include="Models\NBAModel.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>NBAModel.edmx</DependentUpon>
-      <LastGenOutput>NBAModel.Context.cs</LastGenOutput>
-    </Content>
-    <Content Include="Models\NBAModel.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>NBAModel.edmx</DependentUpon>
-      <LastGenOutput>NBAModel.cs</LastGenOutput>
-    </Content>
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <EntityDeploy Include="Models\NBAModel.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>NBAModel.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <Content Include="Models\NBAModel.edmx.diagram">
-      <DependentUpon>NBAModel.edmx</DependentUpon>
-    </Content>
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
