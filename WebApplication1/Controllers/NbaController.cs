@@ -2,33 +2,38 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web.Http;
 using WebApplication1.Controllers.Parameters;
 using WebApplication1.Controllers.ViewModels;
-using WebApplication1.Models;
+using WebApplication1.Repository;
+using WebApplication1.Repository.Helpers;
 
 namespace WebApplication1.Controllers
 {
     [RoutePrefix("Nba")]
     public class NbaController : ApiController
     {
-        private readonly SqlConnection _nbaDatabase;
+        private readonly IDatabaseHelper _databaseHelper;
 
-        public NbaController()
+        public NbaController(IDatabaseHelper databaseHelper)
         {
-            _nbaDatabase = DataCenter.Instance.BasketballLeagueDatabase;
+            _databaseHelper = databaseHelper;
         }
 
         [Route("All")]
         [HttpGet]
         public IEnumerable<NbaViewModel> GetAll()
         {
-            var sqlCommand = "SELECT * FROM [dbo].[NBA]";
-            var result = _nbaDatabase.Query<NbaViewModel>(sqlCommand);
 
-            return result;
+            using (var conn = _databaseHelper.GetConnection())
+            {
+                var sqlCommand = "SELECT * FROM [dbo].[NBA]";
+                var result = conn.Query<NbaViewModel>(sqlCommand);
+                return result;
+            }
         }
 
         [Route("{Name}")]
@@ -37,10 +42,12 @@ namespace WebApplication1.Controllers
         {
             IEnumerable<NbaViewModel> result = null;
 
-            var sqlCommand = $"SELECT * FROM [dbo].[NBA] WHERE Name = @Name";
-            result = _nbaDatabase.Query<NbaViewModel>(sqlCommand, param);
-
-            return result;
+            using (var conn = _databaseHelper.GetConnection())
+            {
+                var sqlCommand = $"SELECT * FROM [dbo].[NBA] WHERE Name = @Name";
+                result = conn.Query<NbaViewModel>(sqlCommand, param);
+                return result;
+            }
         }
 
         [Route()]
@@ -50,7 +57,9 @@ namespace WebApplication1.Controllers
             var result = -999;
             try
             {
-                var sqlCommand = @"
+                using (var conn = _databaseHelper.GetConnection())
+                {
+                    var sqlCommand = @"
                      INSERT INTO [dbo].[NBA]
                                 ([Name]
                                 ,[Team]
@@ -59,7 +68,8 @@ namespace WebApplication1.Controllers
                                 (@Name
                                 ,@Team
                                 ,@Position)";
-                result = _nbaDatabase.Execute(sqlCommand, param);
+                    result = conn.Execute(sqlCommand, param);
+                }
             }
             catch (Exception ex)
             {
@@ -77,20 +87,21 @@ namespace WebApplication1.Controllers
             var result = -999;
             try
             {
-                    var sqlCommand =@"
+                using (var conn = _databaseHelper.GetConnection())
+                {
+                    var sqlCommand = @"
                      UPDATE [dbo].[NBA]
                         SET [Name] = @Name
                            ,[Team] = @Team
                            ,[Position] = @Position
                      WHERE Name = @Name";
-                    result = _nbaDatabase.Execute(sqlCommand, param);
+                    result = conn.Execute(sqlCommand, param);
+                }
             }
             catch (Exception ex)
             {
                 return $"SqlException: {ex}";
             }
-
-
             return result == 1 ? "update success" : "update failed";
         }
 
@@ -102,8 +113,11 @@ namespace WebApplication1.Controllers
 
             try
             {
-                var sqlCommand = $"DELETE FROM [dbo].[NBA] WHERE Name = @Name";
-                result = _nbaDatabase.Execute(sqlCommand, param);
+                using (var conn = _databaseHelper.GetConnection())
+                {
+                    var sqlCommand = $"DELETE FROM [dbo].[NBA] WHERE Name = @Name";
+                    result = conn.Execute(sqlCommand, param);
+                }
             }
             catch (Exception ex)
             {
@@ -122,8 +136,11 @@ namespace WebApplication1.Controllers
 
             try
             {
-                var sqlCommand = $"TRUNCATE TABLE [dbo].[NBA]";
-                 result = _nbaDatabase.Execute(sqlCommand);
+                using (var conn = _databaseHelper.GetConnection())
+                {
+                    var sqlCommand = $"TRUNCATE TABLE [dbo].[NBA]";
+                    result = conn.Execute(sqlCommand);
+                }
             }
             catch(Exception ex)
             {
