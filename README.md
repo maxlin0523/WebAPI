@@ -1,4 +1,7 @@
-WebApi CRUD功能
+# WebApi CRUD功能
+可以參考我寫的
+
+https://max-lin.medium.com/%E5%88%86%E5%B1%A4%E6%9E%B6%E6%A7%8B-9923fcf133b2
 
 API測試: Swegger
 
