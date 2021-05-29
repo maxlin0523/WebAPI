@@ -1,149 +1,71 @@
-﻿using Dapper;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Web.Http;
 using WebApplication1.Controllers.Parameters;
 using WebApplication1.Controllers.Models.ViewModels;
 using WebApplication1.Repository.Helpers;
 using WebApplication1.Controllers.Models.Parameters;
+using WebApplication1.Service.Interfaces;
+using AutoMapper;
+using WebApplication1.Service.Dtos;
+using WebApplication1.Service.Misc;
 
 namespace WebApplication1.Controllers
 {
     [RoutePrefix("Nba")]
     public class NbaController : ApiController
     {
-        private readonly IDatabaseHelper _databaseHelper;
+        private readonly INbaService _nbaService;
 
-        public NbaController(IDatabaseHelper databaseHelper)
+        private readonly IMapper _mapper;
+
+        public NbaController(INbaService nbaService, IMapper mapper)
         {
-            _databaseHelper = databaseHelper;
+            _nbaService = nbaService;
+            _mapper = mapper;
         }
 
         [Route("All")]
         [HttpGet]
         public IEnumerable<NbaViewModel> GetAll()
         {
-
-            using (var conn = _databaseHelper.GetConnection())
-            {
-                var sqlCommand = "SELECT * FROM [dbo].[NBA]";
-                var result = conn.Query<NbaViewModel>(sqlCommand);
-                return result;
-            }
+            var result = _nbaService.GetAll();
+            return _mapper.Map<IEnumerable<NbaViewModel>>(result);
         }
 
-        [Route("{Name}")]
+        [Route("")]
         [HttpGet]
-        public IEnumerable<NbaViewModel> GetByName([FromUri] NbaPrimaryParameter param)
+        public NbaViewModel GetByName([FromUri] NbaPrimaryParameter param)
         {
-            IEnumerable<NbaViewModel> result = null;
-
-            using (var conn = _databaseHelper.GetConnection())
-            {
-                var sqlCommand = $"SELECT * FROM [dbo].[NBA] WHERE Name = @Name";
-                result = conn.Query<NbaViewModel>(sqlCommand, param);
-                return result;
-            }
+            var primaryDto = _mapper.Map<NbaPrimaryDto>(param);
+            var result = _nbaService.GetByName(primaryDto);
+            return _mapper.Map<NbaViewModel>(result);
         }
 
-        [Route()]
+        [Route("")]
         [HttpPost]
-        public string Post([FromBody] NbaParameter param)
+        public IResult Post([FromBody] NbaParameter param)
         {
-            var result = -999;
-            try
-            {
-                using (var conn = _databaseHelper.GetConnection())
-                {
-                    var sqlCommand = @"
-                     INSERT INTO [dbo].[NBA]
-                                ([Name]
-                                ,[Team]
-                                ,[Position])
-                          VALUES
-                                (@Name
-                                ,@Team
-                                ,@Position)";
-                    result = conn.Execute(sqlCommand, param);
-                }
-            }
-            catch (Exception ex)
-            {
-                return $"SqlException: {ex}";
-            }
-
-
-            return result == 1 ? "add success" : "add failed";
+            var dto = _mapper.Map<NbaDto>(param);
+            var result = _nbaService.Post(dto);
+            return result;
         }
 
-        [Route()]
+        [Route("")]
         [HttpPut]
-        public string Put([FromBody] NbaParameter param)
+        public IResult Put([FromBody] NbaParameter param)
         {
-            var result = -999;
-            try
-            {
-                using (var conn = _databaseHelper.GetConnection())
-                {
-                    var sqlCommand = @"
-                     UPDATE [dbo].[NBA]
-                        SET [Name] = @Name
-                           ,[Team] = @Team
-                           ,[Position] = @Position
-                     WHERE Name = @Name";
-                    result = conn.Execute(sqlCommand, param);
-                }
-            }
-            catch (Exception ex)
-            {
-                return $"SqlException: {ex}";
-            }
-            return result == 1 ? "update success" : "update failed";
+            var dto = _mapper.Map<NbaDto>(param);
+            var result = _nbaService.Put(dto);
+            return result;
         }
 
-        [Route("{Name}")]
+        [Route("")]
         [HttpDelete]
-        public string Delete([FromUri] NbaPrimaryParameter param)
+        public IResult Delete([FromUri] NbaPrimaryParameter param)
         {
-            var result = -999;
-
-            try
-            {
-                using (var conn = _databaseHelper.GetConnection())
-                {
-                    var sqlCommand = $"DELETE FROM [dbo].[NBA] WHERE Name = @Name";
-                    result = conn.Execute(sqlCommand, param);
-                }
-            }
-            catch (Exception ex)
-            {
-                return $"SqlException: {ex}";
-            }
-
-
-            return result == 1 ? "delete success" : $"delete failed";
-        }
-
-        [Route("All")]
-        [HttpDelete]
-        public string DeleteAll()
-        {
-            var result = -999;
-
-            try
-            {
-                using (var conn = _databaseHelper.GetConnection())
-                {
-                    var sqlCommand = $"TRUNCATE TABLE [dbo].[NBA]";
-                    result = conn.Execute(sqlCommand);
-                }
-            }
-            catch(Exception ex)
-            {
-                return $"SqlException: {ex}";
-            }
-
-            return result == -1 ? "truncate success" : "truncate failed";
+            var primaryDto = _mapper.Map<NbaPrimaryDto>(param);
+            var result = _nbaService.Delete(primaryDto);
+            return result;
         }
     }
 }

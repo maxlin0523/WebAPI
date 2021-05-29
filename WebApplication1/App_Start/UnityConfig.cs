@@ -1,8 +1,15 @@
+using AutoMapper;
 using System;
 using System.Configuration;
 using Unity;
 using Unity.Injection;
+using WebApplication1.Controllers.Infrastructure.AutoMapperProfile;
 using WebApplication1.Repository.Helpers;
+using WebApplication1.Repository.Implements;
+using WebApplication1.Repository.Interfaces;
+using WebApplication1.Service.Implements;
+using WebApplication1.Service.Infrastructure.AutoMapperProfile;
+using WebApplication1.Service.Interfaces;
 
 namespace WebApplication1
 {
@@ -38,9 +45,25 @@ namespace WebApplication1
         /// </remarks>
         public static void RegisterTypes(IUnityContainer container)
         {
+            // web config
             var connectionString = ConfigurationManager.AppSettings["ConnectionString"];
 
             container.RegisterType<IDatabaseHelper, DatabaseHelper>(new InjectionConstructor(connectionString));
+
+            // Service
+            container.RegisterType<INbaService, NbaService>();
+
+            // Repository
+            container.RegisterType<INbaRepository, NbaRepository>();
+
+            // AutoMapper
+            var mapperConfig = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<ServiceProfile>();
+                cfg.AddProfile<ControllerProfile>();
+            });
+
+            container.RegisterInstance(mapperConfig.CreateMapper());
         }
     }
 }

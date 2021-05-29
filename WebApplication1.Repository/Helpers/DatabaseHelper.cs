@@ -13,7 +13,7 @@ namespace WebApplication1.Repository.Helpers
             _basketballLeagueConnectionString = connectionString;
         }
         
-        public SqlConnection GetConnection()
+        public IDbConnection GetConnection()
         {
             var conn = new SqlConnection(_basketballLeagueConnectionString);
             return conn;                
