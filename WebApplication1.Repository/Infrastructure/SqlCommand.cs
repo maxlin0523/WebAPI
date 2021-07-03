@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace WebApplication1.Repository.Infrastructure
 {
     /// <summary>
-    /// 類別反射出SQL語法 預設class name為table name
+    /// 根據反射類別，映射出SQL語法。
+    /// ※資料表名稱預設為類別名
     /// </summary>
     public class SqlCommand
     {
@@ -20,7 +21,7 @@ namespace WebApplication1.Repository.Infrastructure
 
             var props = type.GetProperties();
 
-            // 遍歷陣列取得欄位、欄位值加入內存
+            // 取得欄位加入內存
             var columns = props.Select(prop =>
                 prop.Name);
 
@@ -28,56 +29,63 @@ namespace WebApplication1.Repository.Infrastructure
                 $"@{prop.Name}");
 
             // 欄位
-            var column = string.Join(", ", columns);
+            var columnString = string.Join(",\r\n", columns);
 
             // 欄位參數
-            var value = string.Join(", ", values);
+            var valueString = string.Join(",\r\n", values);
 
             var table = type.Name;
 
             // 組裝
             var sql = new StringBuilder();
             sql.AppendLine($"INSERT INTO dbo.{table}");
-            sql.AppendLine($"( {column} )");
+            sql.AppendLine($"(");
+            sql.AppendLine(columnString);
+            sql.AppendLine($")");
             sql.AppendLine($"VALUES");
-            sql.AppendLine($"( {value} )");
+            sql.AppendLine($"(");
+            sql.AppendLine(valueString);
+            sql.AppendLine($")");
             return sql.ToString();
         }
 
         /// <summary>
         /// Update語法組裝
         /// </summary>
-        public static string Update<T>(object conditionalParam = null) where T : class
+        public static string Update<T>(object param = null)
+            where T : class
         {
             var type = typeof(T);
 
-            // 遍歷陣列取得欄位並組裝加入內存
+            // 取得欄位並組裝加入內存
             var columns = type.GetProperties()
-                .Select(prop => $"{prop.Name} = @{prop.Name}").ToList();
+                .Select(prop => $"{prop.Name} = @{prop.Name}")
+                .ToList();
 
             // 條件式內存
-            var condition = new List<string>();
+            var conditions = new List<string>();
 
-            // 檢查有無條件式參數
-            if (conditionalParam != null)
+            // 檢查有無條件式
+            if (param != null)
             {
-                // 遍歷陣列取得條件式並組裝加入條件式內存
-                condition = conditionalParam.GetType()
+                // 取得條件式並組裝加入條件式內存
+                conditions = param.GetType()
                     .GetProperties()
-                    .Select(prop => $"{prop.Name} = @{prop.Name}").ToList();
+                    .Select(prop => $"{prop.Name} = @{prop.Name}")
+                    .ToList();
 
-                // 不需要再把條件式欄位也update，故從更新欄位內存中排除
-                columns = columns.Except(condition).ToList();
+                // 條件式參數不需更新，故排除
+                columns = columns.Except(conditions).ToList();
 
-                // 條件式前面需加入WHERE
-                condition[0] = $"WHERE {condition[0]} ";
+                // 條件式前面加上WHERE
+                conditions[0] = $"WHERE {conditions[0]}";
             }
 
             // 欄位
-            var column = string.Join(", ", columns);
+            var columnString = string.Join(",\r\n", columns);
 
             // 條件式
-            var where = string.Join("AND ", condition);
+            var conditionString = string.Join("\r\nAND ", conditions);
 
             var table = type.Name;
 
@@ -85,84 +93,86 @@ namespace WebApplication1.Repository.Infrastructure
             var sql = new StringBuilder();
             sql.AppendLine($"UPDATE dbo.{table}");
             sql.AppendLine($"SET");
-            sql.AppendLine($"{column}");
-            sql.AppendLine($"{where}");
+            sql.AppendLine(columnString);
+            sql.AppendLine(conditionString);
             return sql.ToString();
         }
 
         /// <summary>
         /// Select語法組裝
         /// </summary>
-        public static string Select<T>(object conditionalParam = null) where T : class
+        public static string Select<T>(object param = null)
+            where T : class
         {
             var type = typeof(T);
 
-            // 遍歷陣列取得欄位並加入內存
+            // 取得欄位並加入內存
             var columns = type.GetProperties()
                 .Select(prop => prop.Name);
 
             // 條件式內存
-            var condition = new List<string>();
+            var conditions = new List<string>();
 
             // 檢查有無條件式參數
-            if (conditionalParam != null)
+            if (param != null)
             {
-                // 遍歷陣列取得條件式並組裝加入條件式內存
-                condition = conditionalParam.GetType()
+                // 取得條件式並組裝加入條件式內存
+                conditions = param.GetType()
                     .GetProperties()
-                    .Select(prop => $"{prop.Name} = @{prop.Name}").ToList();
+                    .Select(prop => $"{prop.Name} = @{prop.Name}")
+                    .ToList();
 
-                // 條件式前面需加入WHERE
-                condition[0] = $"WHERE {condition[0]} ";
+                // 條件式前加上WHERE
+                conditions[0] = $"WHERE {conditions[0]}";
             }
 
-            // 欄位
-            var column = string.Join(", ", columns);
+            var columnString = string.Join(",\r\n", columns);
 
-            // 條件式
-            var where = string.Join("AND ", condition);
+            var conditionString = string.Join("\r\nAND ", conditions);
 
             var table = type.Name;
 
             // 組裝
             var sql = new StringBuilder();
             sql.AppendLine("SELECT");
-            sql.AppendLine($"{column}");
+            sql.AppendLine(columnString);
             sql.AppendLine($"FROM dbo.{table}");
-            sql.AppendLine($"{where}");
+            sql.AppendLine(conditionString);
             return sql.ToString();
         }
 
         /// <summary>
         /// Delete語法組裝
         /// </summary>
-        public static string Delete<T>(object conditionalParam = null) where T : class
+        public static string Delete<T>(object param = null)
+            where T : class
         {
             var type = typeof(T);
+
             // 條件式內存
-            var condition = new List<string>();
+            var conditions = new List<string>();
 
-            // 表示有條件式參數
-            if (conditionalParam != null)
+            // 判斷有無條件式參數
+            if (param != null)
             {
-                // 遍歷陣列取得條件式並組裝加入條件式內存
-                condition = conditionalParam.GetType()
+                // 取得條件式並組裝加入條件式內存
+                conditions = param.GetType()
                     .GetProperties()
-                    .Select(prop => $"{prop.Name} = @{prop.Name}").ToList();
+                    .Select(prop => $"{prop.Name} = @{prop.Name}")
+                    .ToList();
 
-                // 條件式前面需加入WHERE
-                condition[0] = "WHERE " + condition[0];
+                // 條件式前加上WHERE
+                conditions[0] = "WHERE " + conditions[0];
             }
 
-            // 條件式
-            var where = string.Join("AND ", condition);
+            var conditionString = string.Join("\r\nAND ", conditions);
 
             var table = type.Name;
 
             // 組裝
             var sql = new StringBuilder();
             sql.AppendLine($"DELETE FROM dbo.{table}");
-            sql.AppendLine($"{where}");
+            sql.AppendLine(conditionString);
             return sql.ToString();
         }
     }

@@ -1,4 +1,6 @@
-﻿using System.Configuration;
+﻿using EF.Diagnostics.Profiling;
+using EF.Diagnostics.Profiling.Data;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -15,8 +17,11 @@ namespace WebApplication1.Repository.Helpers
         
         public IDbConnection GetConnection()
         {
-            var conn = new SqlConnection(_basketballLeagueConnectionString);
-            return conn;                
+            var dbConnection = new SqlConnection(_basketballLeagueConnectionString);
+
+            var dbProfiler = new DbProfiler(ProfilingSession.Current.Profiler);
+
+            return new ProfiledDbConnection(dbConnection, dbProfiler);
         }
     }
 }

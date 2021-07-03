@@ -32,7 +32,7 @@ namespace WebApplication1.Controllers
             return _mapper.Map<IEnumerable<NbaViewModel>>(result);
         }
 
-        [Route("")]
+        [Route()]
         [HttpGet]
         public NbaViewModel GetByName([FromUri] NbaPrimaryParameter param)
         {
@@ -41,7 +41,7 @@ namespace WebApplication1.Controllers
             return _mapper.Map<NbaViewModel>(result);
         }
 
-        [Route("")]
+        [Route()]
         [HttpPost]
         public IResult Post([FromBody] NbaParameter param)
         {
@@ -50,7 +50,7 @@ namespace WebApplication1.Controllers
             return result;
         }
 
-        [Route("")]
+        [Route()]
         [HttpPut]
         public IResult Put([FromBody] NbaParameter param)
         {
@@ -59,7 +59,7 @@ namespace WebApplication1.Controllers
             return result;
         }
 
-        [Route("")]
+        [Route()]
         [HttpDelete]
         public IResult Delete([FromUri] NbaPrimaryParameter param)
         {

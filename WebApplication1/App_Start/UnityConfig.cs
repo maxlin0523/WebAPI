@@ -45,7 +45,6 @@ namespace WebApplication1
         /// </remarks>
         public static void RegisterTypes(IUnityContainer container)
         {
-            // web config
             var connectionString = ConfigurationManager.AppSettings["ConnectionString"];
 
             container.RegisterType<IDatabaseHelper, DatabaseHelper>(new InjectionConstructor(connectionString));
